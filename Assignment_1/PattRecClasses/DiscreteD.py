@@ -24,8 +24,9 @@ class DiscreteD:
         R= row vector with integer random data drawn from the DiscreteD object
            (size(R)= [1, nData]
         """
+
+        return np.random.choice(1,len(probMass)-1, p =probMass)
         
-        return np.random.randint(1,len(probMass)-1, size=nData)
         
     def init(self, x):
         """
