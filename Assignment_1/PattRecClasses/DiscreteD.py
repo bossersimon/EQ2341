@@ -25,10 +25,7 @@ class DiscreteD:
            (size(R)= [1, nData]
         """
         
-        #*** Insert your own code here and remove the following error message 
-        
-        print('Not yet implemented')
-        
+        return np.random.randint(1,len(probMass)-1, size=nData)
         
     def init(self, x):
         """
