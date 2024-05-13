@@ -18,14 +18,11 @@ class MarkovChain:
 
         self.q = initial_prob  #InitialProb(i)= P[S(1) = i]
         self.A = transition_prob #TransitionProb(i,j)= P[S(t)=j | S(t-1)=i]
-
-
         self.nStates = transition_prob.shape[0]
-
         self.is_finite = False
+
         if self.A.shape[0] != self.A.shape[1]:
             self.is_finite = True
-
 
     def probDuration(self, tmax):
         """
@@ -38,10 +35,10 @@ class MarkovChain:
         pD = np.zeros(tmax)
 
         if self.is_finite:
-            pSt = (np.eye(self.nStates)-self.A.T)@self.q
+            pSt = (np.eye(self.nStates)-self.A.T)@self.q # why I-A.T ?
 
             for t in range(tmax):
-                pD[t] = np.sum(pSt)
+                pD[t] = np.sum(pSt) # ? 
                 pSt = self.A.T@pSt
 
         return pD
@@ -49,7 +46,8 @@ class MarkovChain:
     def probStateDuration(self, tmax):
         """
         Probability mass of state durations P[D=t], for t=1...tMax
-        Ref: Arne Leijon (201x) Pattern Recognition, KTH-SIP, Problem 4.7.
+        Ref: Arne Leijon (201x) Pattern Recognition, KTH-SIP, Problem 4.7. 
+                                                                    -> 5.7?
         """
         t = np.arange(tmax).reshape(1, -1)
         aii = np.diag(self.A).reshape(-1, 1)
@@ -85,9 +83,30 @@ class MarkovChain:
            length(S) <= tmaxs
         """
         
-        #*** Insert your own code here and remove the following error message 
+        # Sets "next state" discrete distributions for each current state
+        D = [];
+        for i in self.A[i,:]:   # Each row in A gets a distribution
+            d = DiscreteD(i)
+            D.append(d.init)    # Store distribution in D
+        # D.size() should be nStates
         
-        print('Not yet implemented')
+        # set initial state by sampling from q
+        states = np.arange(1,nStates+1)
+        s = np.random.choice( states, p=self.q )
+
+        S = []
+        S.append(s)
+        # sample from MC
+        t = 1
+        while t<tmax:
+            # checks end state, assumes that end state corresponds to last column
+            if s > len(D):
+                break
+            s = np.random.choice( states, p = d[S] ) # state transition
+            S.append(s)
+            t++
+        
+        return S
 
     def viterbi(self):
         pass
