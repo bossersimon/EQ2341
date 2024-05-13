@@ -25,8 +25,8 @@ class DiscreteD:
            (size(R)= [1, nData]
         """
 
-        return np.random.choice(1,len(probMass)-1, p =probMass)
-        
+        # samples nData values from array [1,...,len(ProbMass)] with distribution given by ProbMass.
+        return np.random.choice( np.arange(1,len(self.ProbMass) +1 ) , nData, p =self.ProbMass )
         
     def init(self, x):
         """
