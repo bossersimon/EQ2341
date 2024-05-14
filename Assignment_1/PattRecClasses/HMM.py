@@ -70,11 +70,8 @@ class HMM:
               nS <= nSamples
         """
         
-        #*** Insert your own code here and remove the following error message
         S = self.stateGen.rand(nSamples)
-        X = []
-        for s in S:
-            X.append(self.distributions[s])
+        X = np.array([self.outputDistr[int(s)-1].rand(1) for s in S[0]])
         return [X,S]
         
     def viterbi(self):
