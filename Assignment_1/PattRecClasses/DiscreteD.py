@@ -26,7 +26,8 @@ class DiscreteD:
         """
 
         # samples nData values from array [1,...,len(ProbMass)] with distribution given by ProbMass.
-        return np.random.choice( np.arange(1,len(self.ProbMass) +1 ) , nData, p =self.ProbMass )
+#        print(f"probMass: {self.probMass}")
+        return np.random.choice( np.arange(1,len(self.probMass) +1 ) , nData, p =self.probMass )
         
     def init(self, x):
         """

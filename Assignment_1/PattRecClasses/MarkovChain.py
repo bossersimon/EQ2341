@@ -85,27 +85,24 @@ class MarkovChain:
         
         # Sets "next state" discrete distributions for each current state
         D = [];
-        for i in self.A[i,:]:   # Each row in A gets a distribution
-            d = DiscreteD(i)
-            D.append(d.init)    # Store distribution in D
-        # D.size() should be nStates
-        
+        for i in self.A:   # Each row in A gets a distribution
+            D.append(DiscreteD(i)) 
+
         # set initial state by sampling from q
-        states = np.arange(1,nStates+1)
+        states = np.arange(1,self.nStates+1)
         s = np.random.choice( states, p=self.q )
 
-        S = []
-        S.append(s)
+        S = np.zeros([1,tmax])
+        S[0,0] = s
         # sample from MC
         t = 1
         while t<tmax:
             # checks end state, assumes that end state corresponds to last column
             if s > len(D):
                 break
-            s = np.random.choice( states, p = d[S] ) # state transition
-            S.append(s)
+            s = D[ int(S[0,t-1]) -1].rand(1)
+            S[0,t] = s
             t = t+1
-        
         return S
 
     def viterbi(self):
