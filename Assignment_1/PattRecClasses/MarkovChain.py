@@ -104,7 +104,7 @@ class MarkovChain:
                 break
             s = np.random.choice( states, p = d[S] ) # state transition
             S.append(s)
-            t++
+            t = t+1
         
         return S
 

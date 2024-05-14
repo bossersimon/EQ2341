@@ -70,9 +70,12 @@ class HMM:
               nS <= nSamples
         """
         
-        #*** Insert your own code here and remove the following error message 
-        
-        print('Not yet implemented')
+        #*** Insert your own code here and remove the following error message
+        S = self.stateGen.rand(nSamples)
+        X = []
+        for s in S:
+            X.append(self.distributions[s])
+        return [X,S]
         
     def viterbi(self):
         pass
