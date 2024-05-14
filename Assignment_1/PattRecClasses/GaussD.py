@@ -18,7 +18,7 @@ class GaussD:
 
         self.means = np.array(means)
         self.stdevs = np.array(stdevs)
-        self.dataSize = len(self.means)
+        self.dataSize = np.size(self.means)
 
         if cov is None:
             self.variance = self.stdevs**2
