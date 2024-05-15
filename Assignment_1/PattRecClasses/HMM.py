@@ -90,7 +90,7 @@ class HMM:
         pass
 
     def setStationary(self):
-        pass
+         pass
 
     def logprob(self):
         pass
