@@ -89,21 +89,19 @@ class MarkovChain:
             D.append(DiscreteD(i)) 
 
         # set initial state by sampling from q
-        states = np.arange(1,self.nStates+1)
-        s = np.random.choice( states, p=self.q )
+        s = np.random.choice( np.arange(1,self.nStates+1), p=self.q )
 
         S = np.zeros([1,tmax])
         S[0,0] = s
         # sample from MC
         t = 1
         while t<tmax:
-            # checks end state, assumes that end state corresponds to last column
             if s > len(D):
                 break
             s = D[ int(S[0,t-1]) -1].rand(1)
             S[0,t] = s
             t = t+1
-        return S
+        return S[S != 0]
 
     def viterbi(self):
         pass
