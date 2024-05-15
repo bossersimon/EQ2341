@@ -71,13 +71,13 @@ class HMM:
         """
 
         S = self.stateGen.rand(nSamples)
-
+        X = [] 
         if len(S)>len(self.outputDistr): #if finite
-            X = np.array([self.outputDistr[int(s)-1].rand(1) for s in S[0:-1]])
-        else: # include entire state array
-            X = np.array([self.outputDistr[int(s)-1].rand(1) for s in S])
+            X = [self.outputDistr[int(s)-1].rand(1) for s in S[0:-1]]
+        else: 
+            X = [self.outputDistr[int(s)-1].rand(1) for s in S]
 
-        X = X.reshape(len(X))
+        X = np.concatenate(X,axis = 1)
         return [X,S]
         
     def viterbi(self):
