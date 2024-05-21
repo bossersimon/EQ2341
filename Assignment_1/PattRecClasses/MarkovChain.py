@@ -132,8 +132,9 @@ class MarkovChain:
         # init
 
         alfaTemp = np.array( np.multiply( self.q, pX[:,0]) ) # q_j@b_j(x_t) 
+    #    print(f"alfaTemp: {alfaTemp}")
         c = np.array( sum(alfaTemp) )
-        alfaHat = np.zeros([2,3])
+        alfaHat = np.zeros([self.nStates,pX.shape[1]])
         alfaHat[:,0] = alfaTemp/c 
 
         # forward step
@@ -144,15 +145,34 @@ class MarkovChain:
             alfaHat[:,t] = alfaHat[:,t]/c[t] 
 
         if self.is_finite:
-            pass
+            c = np.append(c, sum( alfaHat[:,-1]*self.A[:,-1]) )
 
         return [alfaHat, c]
 
     def finiteDuration(self):
         pass
     
-    def backward(self):
-        pass
+    def backward(self, pX, c):
+
+        """initialization"""
+
+        beta =  np.zeros( [self.nStates, pX.shape[1]] )
+        betaHat =  np.zeros( [self.nStates, pX.shape[1]] )
+        if self.is_finite:
+            beta[:,-1] = self.A[:,-1]
+            betaHat[:,-1] = beta[:,-1]/(c[-2]*c[-1])
+        else: 
+            beta[:,-1] = 1
+            betaHat[:,-1] = 1/c[-2]
+
+        """step"""
+        for n in range(0, pX.shape[1]-1):
+            t = pX.shape[1]-2-n
+
+            for i in range(self.nStates):
+                betaHat[i,t] = (1/c[t])*sum( self.A[i,0:self.nStates]*pX[:,t+1]*betaHat[:,t+1] )
+
+        return betaHat
 
     def adaptStart(self):
         pass
