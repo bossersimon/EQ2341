@@ -84,6 +84,7 @@ class MarkovChain:
         """
         
         # Sets "next state" discrete distributions for each current state
+        # (B matrix)
         D = [];
         for i in self.A:   # Each row in A gets a distribution
             D.append(DiscreteD(i)) 
@@ -96,7 +97,7 @@ class MarkovChain:
         # sample from MC
         t = 1
         while t<tmax:
-            if s > len(D):
+            if s > len(D): # if END-state
                 break
             s = D[ int(S[0,t-1]) -1].rand(1)
             S[0,t] = s

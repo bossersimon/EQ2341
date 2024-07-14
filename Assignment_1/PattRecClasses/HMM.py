@@ -72,9 +72,13 @@ class HMM:
 
         S = self.stateGen.rand(nSamples)
         X = [] 
-        if len(S)>len(self.outputDistr): #if finite
+
+        #if self.stateGen.is_finite:
+            # for each generated state, sample output and store in X. 
+
+        if S[-1] > self.nStates: # Checks if last state is END-state
             X = [self.outputDistr[int(s)-1].rand(1) for s in S[0:-1]]
-        else: 
+        else:
             X = [self.outputDistr[int(s)-1].rand(1) for s in S]
 
         X = np.concatenate(X,axis = 1)
