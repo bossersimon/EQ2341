@@ -155,16 +155,17 @@ class MarkovChain:
     
     def backward(self, pX, c):
 
-        """initialization"""
 
-        beta =  np.zeros( [self.nStates, pX.shape[1]] )
+        beta =  np.zeros( [self.nStates, pX.shape[1]] ) # beta_i_t
         betaHat =  np.zeros( [self.nStates, pX.shape[1]] )
+
+        """initialization"""
         if self.is_finite:
             beta[:,-1] = self.A[:,-1]
             betaHat[:,-1] = beta[:,-1]/(c[-2]*c[-1])
         else: 
             beta[:,-1] = 1
-            betaHat[:,-1] = 1/c[-2]
+            betaHat[:,-1] = 1/c[-1]
 
         """step"""
         for n in range(0, pX.shape[1]-1):
