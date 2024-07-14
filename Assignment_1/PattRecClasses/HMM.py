@@ -98,7 +98,9 @@ class HMM:
 
     def logprob(self, x_obs):
         pX = np.array([b.prob(x_obs) for b in self.outputDistr])
-        [a, c] = self.stateGen.forward(pX/sum(pX))
+        sf = [np.max(p) for p in pX.T] # scale factors
+        [a, c] = self.stateGen.forward(pX)
+        
         return sum(np.log(c))
 
     def adaptStart(self):
