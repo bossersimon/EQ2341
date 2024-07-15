@@ -35,10 +35,10 @@ class MarkovChain:
         pD = np.zeros(tmax)
 
         if self.is_finite:
-            pSt = (np.eye(self.nStates)-self.A.T)@self.q # why I-A.T ?
+            pSt = (np.eye(self.nStates)-self.A.T)@self.q 
 
             for t in range(tmax):
-                pD[t] = np.sum(pSt) # ? 
+                pD[t] = np.sum(pSt) 
                 pSt = self.A.T@pSt
 
         return pD
@@ -133,7 +133,6 @@ class MarkovChain:
         # init
 
         alfaTemp = np.array( np.multiply( self.q, pX[:,0]) ) # q_j@b_j(x_t) 
-    #    print(f"alfaTemp: {alfaTemp}")
         c = np.array( sum(alfaTemp) )
         alfaHat = np.zeros([self.nStates,pX.shape[1]])
         alfaHat[:,0] = alfaTemp/c 
@@ -154,7 +153,6 @@ class MarkovChain:
         pass
     
     def backward(self, pX, c):
-
 
         beta =  np.zeros( [self.nStates, pX.shape[1]] ) # beta_i_t
         betaHat =  np.zeros( [self.nStates, pX.shape[1]] )
