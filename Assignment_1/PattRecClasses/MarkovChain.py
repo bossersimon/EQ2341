@@ -16,8 +16,8 @@ class MarkovChain:
     """
     def __init__(self, initial_prob, transition_prob):
 
-        self.q = initial_prob  #InitialProb(i)= P[S(1) = i]
-        self.A = transition_prob #TransitionProb(i,j)= P[S(t)=j | S(t-1)=i]
+        self.q = initial_prob  
+        self.A = transition_prob 
         self.nStates = transition_prob.shape[0]
         self.is_finite = False
 

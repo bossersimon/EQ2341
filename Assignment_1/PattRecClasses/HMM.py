@@ -84,8 +84,51 @@ class HMM:
     def viterbi(self):
         pass
 
-    def train(self):
-        pass
+    def train(self, X_train):
+        epsilon = 10e-10
+        gma = []
+        xi = []
+
+        for xr in X_train:
+            pX = np.array([b.prob(xr) for b in self.outputDistr])
+            xi_r = np.zeros( (3,3,len(xr)) )
+
+            # replace zero probabilities with some small probability epsilon
+            with np.nditer(pX, op_flags =['readwrite']) as it:
+                for x in it:
+                    x[...] = max(x,epsilon)
+
+            """normalize"""
+            pX = pX / np.sum(pX,axis=0)
+
+            [alfaHat, c] = self.stateGen.forward(pX)
+            betaHat = self.stateGen.backward(pX, c)
+
+            tmp = np.multiply(alfaHat, betaHat)
+            gma_r = np.multiply(tmp,c) # gamma i,t
+            gma.append(gma_r)
+
+            """xi"""
+            for t in range(len(xr)-1):
+                for i in range(3):
+                    for j in range(3):
+                        xi_r[i,j,t] = alfaHat[i,t]*self.stateGen.A[i,j]*pX[j,t+1]*betaHat[j,t+1]
+            
+            xi.append(np.sum(xi_r[:,:,:-1], axis = 2))
+
+        xi = np.sum( np.array(xi), axis= 0)
+
+        """Update equations"""
+
+        q_new = np.zeros((1,3))
+        for r in gma:
+            q_new = q_new + r[:,0]
+            
+        q_new = q_new/len(gma)
+        A_new = xi/(np.sum(xi,axis=1)[:,None])
+
+        self.stateGen.q = q_new
+        self.stateGen.A = A_new
 
     def stateEntropyRate(self):
         pass
@@ -95,7 +138,6 @@ class HMM:
 
     def logprob(self, x_obs):
         pX = np.array([b.prob(x_obs) for b in self.outputDistr])
-        sf = [np.max(p) for p in pX.T] # scale factors
         [a, c] = self.stateGen.forward(pX)
         
         return sum(np.log(c))
