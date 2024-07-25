@@ -81,8 +81,28 @@ class HMM:
         X = np.concatenate(X,axis = 1)
         return [X,S]
         
-    def viterbi(self):
-        pass
+    def viterbi(self, x_obs):
+        """Initialization"""
+        chi = np.zeros((self.nStates,len(x_obs)))
+        zeta = np.zeros((self.nStates,len(x_obs)))
+        pX = np.array([b.prob(x_obs) for b in self.outputDistr])
+        chi[:,0] = np.multiply(self.stateGen.q, pX[:,0]) # chi_1 = q*b(x_1)
+        
+        """Forward Step"""
+        for t in range(1,len(x_obs)):
+            for j in range(0,self.nStates):
+                chi[j,t] = pX[j,t]*np.max( chi[:,t-1]*self.stateGen.A[:,j] )
+                zeta[j,t] = np.argmax( chi[:,t-1]*self.stateGen.A[:,j] )
+
+        best_sequence = np.zeros(len(x_obs), dtype = int)
+        best_sequence[-1] = np.argmax(chi[:,-1])
+
+        """Backtacking"""
+        for t in range(len(x_obs)-2, -1, -1):
+            best_sequence[t] = zeta[ best_sequence[t+1],t+1 ]
+
+        print(best_sequence)
+        return best_sequence
 
     def train(self, X_train):
         epsilon = 10e-10
