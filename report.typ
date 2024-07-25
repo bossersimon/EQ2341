@@ -14,9 +14,11 @@ $ q = vec(0.75, 0.25); quad A = mat(0.99, 0.01; 0.03, 0.97) $
 $ p_1 = q^T\A = mat(0.75, 0.25) = q^T => \
 => p A = p $ (constant for all t)
 
-*Measured frequencies:* between .69 and .82 for S1
+*Measured frequencies:* 
+$ S_1 = 0.749; quad S_2 = 0.251 $
 
-Calculation of the total expectation $E[X_t]$ for the first infininte-duration HMM:
+
+*Calculation of $E[X], "var"[X]$ for the first infinite-duration HMM:*
 
 $E[X] = E_S\[E_X\[X|S]]$ ;  $E[X|S=1] = #sym.mu\ _1 = 0 $, $E[X|S=2] = #sym.mu\ _2 = 3 $
 
@@ -32,22 +34,6 @@ $E[X] = sum_j E[X|S=j]P(S=j) = \
 
 
 Total variance $"var"[X]$:
-/*
-$"var"[X] = E_S\["var"_X\[X|S]] + "var"_S\[E_X\[X|S]] $
-
-$E_S\["var"_X\[X|S]] = "var"[X|S=1]P(S=1) + "var"[X|S=2]P(S=2) = 1.25$
-
-$"var"_S\[E_X\[X|S]] = E_S\[(E[X|S])^2] - (E_S]\[E[X|S]])^2 $ 
-
-$E_S\[E[X|S]] = mu_1P(S=1) + mu_2P(S=2) = mu_2P(S=2)$
-
-$E_S\[(E[X|S])^2] = mu_1^2P(S=1) + mu_2^2P(S=2) = mu_2^2P(S=2)$
-
-$"var"_S\[E_X\[X|S]] = mu_2P(S=2) - mu_2^2P(S=2) = 1.69$
-
-$ => "var"_X = 2.94$
-
-*/
 
 $"var"[X] = E_S\["var"_X\[X|S]] + "var"_S\[E_X\[X|S]] = {p.14} =\
   = "var"_X\[X|S=1]P(S=1) + "var"_X\[X|S=2]P(S=2) + \
@@ -56,9 +42,8 @@ $"var"[X] = E_S\["var"_X\[X|S]] + "var"_S\[E_X\[X|S]] = {p.14} =\
   = 3.4375
 $
 
-*Measured results*: mean: Usually 70-80 but sometimes below 60 and above 90.
-variance: Between 3 and 4
-
+*Measured results*: 
+$ E[X] approx 0.81; quad "var"[X] approx 3.59 $
 
 #figure(
   image("images/A.1q4.png", width: 80%),
@@ -92,9 +77,11 @@ The lengths are quite spread, and they are rarely longer than 200 samples even t
 
 = 7
 
-$ q = vec(0.5,0.5); quad A = mat( 0.7,0.2,0.1; 0.05, 0.95,0); quad B = vec(b_1~ N(mu_1,sigma_1), b_2 ~N(mu_2, sigma_2)) $
-$ mu_1 = vec(0,1), sigma_1 = mat(2,1;1,4) $
-$ mu_2 = vec(2,3), sigma_2 = mat(2,0;0,1) $
+$ q = vec(0.5,0.5); quad A = mat( 0.7,0.2,0.1; 0.05, 0.95,0); quad B = vec(b_1~ N(mu_1,Sigma_1), b_2 ~N(mu_2, Sigma_2)) $
+$ mu_1 = vec(0,1), Sigma_1 = mat(2,1;1,4) $
+$ mu_2 = vec(2,3), Sigma_2 = mat(2,0;0,1) $
+
+*Verify implementation?*
 
 #align(center, text(15pt)[ 
   *Assignment 2*
@@ -125,7 +112,6 @@ Your assignment report should include
 • A copy of your finished \@HMM/logprob function
 
 • A copy of your finished \@MarkovChain/backward function.
-
 
 #align(center, text(15pt)[ 
   *Assignment 3*
