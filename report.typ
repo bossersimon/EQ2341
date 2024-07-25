@@ -131,7 +131,7 @@ dencies or setup requirements, if applicable.
 
 Data for the project was collected using the Sensor Fusion app. Hmmhmm recordings were done, comprising? hmmmhmm minutes of activity data. I'm the only person doing the recordings because I thought it was the easiest and fastest way. Of course, using data from multiple people would probably result in a more useful and more general classifier. I think however that the point of the project is to simply train an HMM and if it's not good it won't really matter, and if it performs exceptionally well (close to 100% accuracy) I will probably know why.
 
-For feature extraction, the absolute value of the euclidean norm was calculated for each recorded signal (i.e. the norm of the acceleration) and the mean was then calculated for equally large segments of the resulting signal. This resulted in a number of windows ($x_t$), each 100 samples long, containing the mean value of each segment (@eq1). These windows were then used as features for model training and testing. 
+For feature extraction, the absolute value of the euclidean norm was calculated for each recorded signal (i.e. the norm of the acceleration) and the mean was then calculated for equally large segments of the resulting signal. The norm signal and the (segmented) mean signal are shown in @acc and @meanAcc, respectively. This resulted in a number of windows ($x_t$), each 100 samples long, containing the mean value of each segment (@eq1). These windows were then used as features for model training and testing. 
 
 #set math.equation(
   numbering: "(1)",
@@ -140,9 +140,27 @@ For feature extraction, the absolute value of the euclidean norm was calculated 
 
 $ x_t = (sum_(l=100t)^(100(t+1)-1) sqrt(a_x^2+a_y^2+a_z^2))/100 $ <eq1>
 
+
+#figure(
+  image("images/A.3_acc.png", width: 100%),
+  caption: [Histogram showing lengths of 600 generated sequences],
+) <acc>
+
+#figure(
+  image("images/A.3_meanAcc.png", width: 100%),
+  caption: [Histogram showing lengths of 600 generated sequences],
+) <meanAcc>
+
+
 Additional features could've been added to provide more useful information to the classifier, which is usually the case. In this solution however, a single type of feature was sufficient, owing to the simplicity of the task; The differences in acceleration between the three activities is so large and clear-cut that no more information was needed. More features would probably be needed if more activities were to be added (e.g. walking up/down stairs, cycling), or if there was no clear-cut distinction between the activities. And this classifier may have trouble classifying a faster walk on the verge of running for example.
 
-In order to label the features ($x_t$) in the recordings, a simple threshold mechanism was used as can be seen in *fig...*. The thresholds were chosen based on inspection and all recordings were also checked for inconsistencies or outliers. 
+In order to label the features ($x_t$) in the recordings, a simple threshold mechanism was used as can be seen in @labels. The thresholds were chosen based on inspection and all recordings were also checked for inconsistencies or outliers. This can be thought of as a "rough" sliding window detector.   
+
+#figure(
+  image("images/A.3_labels.png", width: 100%),
+  caption: [Histogram showing lengths of 600 generated sequences],
+) <labels>
+
 
 = HMM Initialization
 The train/test data was divided in a *{hmm}* split.
@@ -156,16 +174,20 @@ An infinite-duration ergodic HMM is chosen to model the behaviour, so it may sta
 
 The following assumptions were made; That each activity is equally probable, so the elements of $q$ are equal for all states. For the transition probabilities it is more probable to stay in a certain state for at least a few seconds than to transition directly. Given that the data was sampled at $100$Hz and that each window is $100$ samples long, the diagonal values were set quite high to reflect this behaviour. A segment of any state is therefore considered to be $9s$ on average, but there is no correct answer here ("How long is a walk?"). The non-diagonal elements are also somewhat arbitrary; From the "standing" state it is quite improbable to start running directly, as is the transition from "running" to "standing". Conversely, while in the "walking" state, it's assumed that it's equally likely to start running and to stop walking.
 
-The emission probability distributions are chosen as three separate (scalar) gaussian distributions. There is just a single feature and plotting the features of a recording in a histogram gives a bell curve so this seems like a reasonable choice. One such histogram is shown in *fig ...*. The distributions were initialized by fitting to clusters of data for each activity as discussed in *section 6.2.4*.
+The emission probability distributions are chosen as three separate (scalar) gaussian distributions. There is just a single feature and collecting the features of a recording in a histogram resembles a bell curve so this seems like a reasonable choice. One such histogram is shown in *fig ...*. The distributions were initialized by fitting to clusters of data for each activity as discussed in *section 6.2.4*.
 
 
 $ B = vec(b_1~N(0.21, 0.13), b_2~N(1.74, 0.46), b_3~N(5.97, 0.99)) $
 
- 
+#figure(
+  image("images/A.3_hist.png", width: 80%),
+  caption: [Histogram showing lengths of 600 generated sequences],
+) <hist>
+
 
 = HMM Training
 
-The HMM was trained using the Baum-Welch algorithm. It was done automatically using *Eq 6.10, 6.13* in the course book. The output probability distributions were however not updated. GMM's were not used, so *7.6.5* was not relevant, and the mean and variances are already estimated as the weighted average of the observed data and observed variances, respectively.
+The HMM was trained using the Baum-Welch algorithm. It was done automatically using *Eq 6.10, 6.13* in the course book. The output probability distributions were however not updated; GMM's were not used, so *7.6.5* was not relevant, and the mean and variances are already estimated as the weighted average of the observed data and observed variances, respectively.
 
 One issue prior to training was that some output probabilities evaluated to zero when applied to feature data. This is arguably because the distributions are so far away from each other and some samples of running would result in a zero probability of standing still. This sounds alright but in order to avoid numerical problems later on all probabilities below a certain (small) threshold $epsilon$ were set to the threshold value using the $max()$-function.
 
