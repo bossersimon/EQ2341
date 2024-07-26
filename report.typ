@@ -106,7 +106,7 @@ $ "pX" = mat(0.39104269, 0.01358297, 0.17136859; 0.05546042, 0.19552135, 0.13899
 
 This gives 
 
-$ c = mat(1. ,0.16252347 ,0.82658096 ,0.05811253) $
+$ c = mat(1. ,0.16252347 ,0.82658096 ,0.05811253). $
 
 Obviously, the columns of pX do not add up to $1$ in this case. Perhaps this is not very important as long as numerical problems are avoided as discussed in p.237 in the textbook. 
 
@@ -114,9 +114,9 @@ Obviously, the columns of pX do not add up to $1$ in this case. Perhaps this is 
   *Assignment 3*
   ])
 
-Data for the project was collected using the Sensor Fusion app. Hmmhmm recordings were done, comprising? hmmmhmm minutes of activity data. I'm the only person doing the recordings because I thought it was the easiest and fastest way. Of course, using data from multiple people would probably result in a more useful and more general classifier. I think however that the point of the project is to simply train an HMM and if it's not good it won't really matter, and if it performs exceptionally well (close to 100% accuracy) I will probably know why.
+Data for the project was collected using the Sensor Fusion app. $11$ recordings were made, containing roughly $23$ minutes of activity data in total. I'm the only person doing recordings because I thought it was the easiest and fastest way. Of course, using data from multiple people would result in a more useful and more general classifier. 
 
-For feature extraction, the absolute value of the euclidean norm (subtracting the gravitational acceleration) was calculated for each recorded signal (i.e. the norm of the acceleration) and the mean was then calculated for equally large segments of the resulting signal. The norm signal and the (segmented) mean signal are shown in @acc and @meanAcc, respectively. This resulted in a number of windows ($x_t$), each 100 samples long, containing the mean value of each segment (@eq1). These windows were then used as features for model training and testing. 
+For feature extraction, the euclidian norm of the recorded acceleration was first calculated, and subtracting the gravitational acceleration leaves us with the movement signal only. This made the resulting signal independent of the orientation of the phone which is convenient for this task. Then the absolute value was taken to obtain the magnitude as can be seen in @acc. Furthermore, the mean of this magnitude was calculated for equally spaced segments (of $100$ samples), leaving us with a number of windowed segments $x_t$ which were used as features for model training and testing, shown in @meanAcc. These windows were then used as features for model training and testing. The exact same result is obtained with a moving average.
 
 #set math.equation(
   numbering: "(1)",
@@ -128,22 +128,24 @@ $ x_t = (sum_(l=100t)^(100(t+1)-1) abs(sqrt(a_x^2+a_y^2+a_z^2) - 9.82))/100 $ <e
 
 #figure(
   image("images/A.3_acc.png", width: 100%),
-  caption: [Histogram showing lengths of 600 generated sequences],
+  caption: [Magnitude of acceleration for a recording],
 ) <acc>
 
 #figure(
   image("images/A.3_meanAcc.png", width: 100%),
-  caption: [Histogram showing lengths of 600 generated sequences],
+  caption: [Segmented mean of recording],
 ) <meanAcc>
 
 
 More features could've been added to provide additional useful information to the classifier. In this solution however, a single type of feature was arguably sufficient, owing to the simplicity of the task; The differences in acceleration between the three activities are so large and clear-cut. More features would probably be needed if more activities were to be added (e.g. walking up/down stairs, cycling), or if there was no clear-cut distinction between the activities. And this classifier may have trouble classifying a faster walk on the verge of running for example.
 
-In order to label the features ($x_t$) in the recordings, a simple threshold mechanism was used as can be seen in @labels. The thresholds were chosen based on inspection and all recordings were also checked for inconsistencies or outliers. This can be thought of as a "rough" sliding window detector.   
+In order to label the features ($x_t$) in the recordings, a simple threshold mechanism was used as can be seen in @labels. The thresholds were chosen based on inspection and all recordings were also checked for inconsistencies or outliers. This can be thought of as a "rough" sliding window detector. 
+
+The recordings were also divided into smaller segments of 50 samples in order to facilitate the division into train- and test data later on. Instead of 11 recordings of different lengths, there are now 27 sub-segments of roughly equal length. For training of an ergodic HMM this does not matter as long as each recording contains at least a few transitions.
 
 #figure(
-  image("images/A.3_labels.png", width: 100%),
-  caption: [Histogram showing lengths of 600 generated sequences],
+  image("images/A.3_labels2.png", width: 100%),
+  caption: [Labeled sub-segment of a recording],
 ) <labels>
 
 
@@ -154,11 +156,11 @@ The inital HMM was chosen as
 #set math.equation( numbering: none)
 $ q = vec(1/3,1/3,1/3); quad A = mat(0.9,0.09,0.01; 0.05,0.9,0.05; 0.01,0.09,0.9); quad B = vec(b_1(x),b_2(x), b_3(x)), $ where state 1 = "Standing", state 2 = "Walking", state 3 = "Running".
 
-An infinite-duration ergodic HMM is chosen to model the behaviour, so it may start in any state. This choice is due to the fact that there is no way to get locked up in any subset of states (You cannot run forever), and there is no periodicity in these types of activities.
+An infinite-duration ergodic HMM is chosen to model the behaviour so it may start in any state. This choice is due to the fact that there is no way to get locked up in any subset of states (You cannot run forever), and there is no periodicity in these types of activities.
 
-The following assumptions were made; That each activity is equally probable, so the elements of $q$ are equal for all states. For the transition probabilities it is more probable to stay in a certain state for at least a few seconds than to transition directly. Given that the data was sampled at $100$Hz and that each window is $100$ samples long, the diagonal values were set quite high to reflect this behaviour. A segment of any state is therefore considered to be $9s$ on average, but there is no correct answer here ("How long is a walk?"). The non-diagonal elements are also somewhat arbitrary; From the "Standing" state it is quite improbable to start running directly, as is the transition from "Running" to "Standing". Conversely, while in the "Walking" state, it's assumed that it's equally likely to start running and to stop walking.
+The following assumptions were made; That each activity is equally probable, so the elements of $q$ are equal for all states. For the transition probabilities it is more probable to stay in a certain state for at least a few seconds than to transition directly. Given that the data was sampled at $100$Hz and that each window is $100$ samples long, the diagonal values were set quite high to reflect this behaviour. A segment of any state is therefore considered to be $9s$ on average, but there is no correct answer here ("How long is a walk?"). The non-diagonal elements are also somewhat guesstimated; From the "Standing" state it is quite improbable to start running directly, as is the transition from "Running" to "Standing". Conversely, while in the "Walking" state, it's assumed that it's equally likely to start running and to stop walking.
 
-The emission probability distributions are chosen as three separate (scalar) Gaussian distributions. There is just a single feature and collecting the features of a recording in a histogram resembles a bell curve so this seems like a reasonable choice. One such histogram is shown in *fig ...*. The distributions were initialized by fitting to clusters of data for each activity as discussed in section 6.2.4 in the textbook. They are defined in @eqB below. 
+The emission probability distributions are chosen as three separate (scalar) Gaussian distributions. There is just a single feature and collecting the features of a recording in a histogram resembles a bell curve so this seems like a reasonable choice. One such histogram is shown in @hist. The distributions were initialized by fitting to clusters of data for each activity as discussed in section 6.2.4 in the textbook. They are defined in @eqB below. 
 
 #set math.equation(numbering: "(1)")
 $ B = vec(b_1~N(0.21, 0.13), b_2~N(1.76, 0.45), b_3~N(6.01, 0.99)) $ <eqB>
@@ -166,11 +168,11 @@ $ B = vec(b_1~N(0.21, 0.13), b_2~N(1.76, 0.45), b_3~N(6.01, 0.99)) $ <eqB>
 
 #figure(
   image("images/A.3_hist.png", width: 80%),
-  caption: [Histogram showing lengths of 600 generated sequences],
+  caption: [Amplitudes of recorded "Walking" feature samples],
 ) <hist>
 
 = HMM Training
-The train/test data was divided in a 3:1 split. This choice is arbitrary and seemed to work fine, but a 1:1- or a 4:1- split would probably work also.
+The train/test data was divided in a 3:1 split. This choice is of little importance and it seemed to work fine like this, but a 1:1- or a 4:1- split would probably work also.
 
 The HMM was then trained using the Baum-Welch algorithm. It was done automatically by following Eq. $6.10$ and $6.13$ in the course book. The output probability distributions were however not updated; GMM's were not used, so Eq. $7.6.5$ (in the course book) was not relevant, and the mean and variances are already estimated as the weighted average of the observed data and observed variances, respectively. If more data was collected to update the model, these distributions would have to be updated also.
 
@@ -183,20 +185,17 @@ $ q = vec(0.17, 0.56, 0.28); quad A = mat(0.86,0.13,0.01; 0.04,0.92,0.04; 4e-3,0
 = Classifier Evaluation
 
 
-The most probable sequences according to the HMM were obtained using the Viterbi algorithm, which were then compared to the true labels. The classification is summarized in the confusion matrix in @confusion. In total *blabla % * of the states were correctly classified. 
+The most probable sequences in the test data according to the HMM were obtained using the Viterbi algorithm, which were then compared to the true labels. The classification is summarized in the confusion matrix in @confusion. In total 99.59% of the states were correctly classified. 
 
 #figure(
   image("images/A.3_confusion.png", width: 80%),
-  caption: [Histogram showing lengths of 600 generated sequences],
+  caption: [Confusion matrix showing classification results on the test dataset],
 ) <confusion>
 
+The classifier worked well in this case, but considering there was only one person collecting the data it might not prove useful on data from other people. This model is rather dumb; it only looks at the magnitude of the input signal and is probably sensitive to outliers even though a moving average was used. What speaks for the model is that it is simple and contains only a single feature, i.e. very low complexity. The few misclassifications could probably have been avoided by including more features to discriminate the signals, for example a signal that can account for the frequency of the activity.
 
+In a different problem if more activities were included, it would've been a more complicated task. Perhaps you would've needed the z-coordinate of the acceleration after all for distinguishing walking on the ground from walking in a staircase. A more complex problem would obviously need more data. 
 
-Ideas for improvements:
-Use z- coordinate; for stairs, running
-More data
-More people
-More states
-Synthetic data
-Comment on choice of features
-Cross-validation
+There were also some things that I thought about but didn't implement; Since gathering data this way is a bit tedious (in other cases it can also be very expensive), you could make out the distribution(s) from a smaller amount of data and sample from this to generate more data. For this project, I figured that generating synthetic recordings using an existing transition matrix wouldn't exactly improve the accuracy of the resulting matrix, for example. 
+
+Cross-validation could've been used to get a better idea of the quality of the model. Especially when the amount of training data is small. This is more imporant for more complex models, so it was omitted in this project. Looking at the performance on the test data, I would argue that the model is not overfitting at least, but as mentioned above it probably generalizes poorly. 

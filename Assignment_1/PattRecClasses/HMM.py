@@ -74,9 +74,9 @@ class HMM:
         X = [] 
 
         if S[-1] > self.nStates: # Checks if last state is END-state
-            X = [self.outputDistr[int(s)-1].rand(1) for s in S[0:-1]]
+            X = [ self.outputDistr[int(s)-1].rand(1) for s in S[0:-1] ]
         else:
-            X = [self.outputDistr[int(s)-1].rand(1) for s in S]
+            X = [ self.outputDistr[int(s)-1].rand(1) for s in S ]
 
         X = np.concatenate(X,axis = 1)
         return [X,S]
@@ -101,8 +101,7 @@ class HMM:
         for t in range(len(x_obs)-2, -1, -1):
             best_sequence[t] = zeta[ best_sequence[t+1],t+1 ]
 
-        print(best_sequence)
-        return best_sequence
+        return [i + 1 for i in best_sequence]
 
     def train(self, X_train):
         epsilon = 10e-10
